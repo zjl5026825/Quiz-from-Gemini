@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>智学题库系统 Pro</title>
+    <title>智学题库 Pro</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -22,9 +22,8 @@
             --success: #34d399; --error: #fb7185; --border: #334155; --subtext: #94a3b8;
         }
         * { box-sizing: border-box; transition: background 0.2s, color 0.2s; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; -webkit-user-select: none; }
         
-        /* 简洁 UI 布局 */
         .nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
         .container { max-width: 700px; margin: 0 auto; padding: 20px; padding-bottom: 100px; }
         
@@ -32,11 +31,9 @@
         #mg-panel { display: none; position: fixed; right: 0; top: 0; bottom: 0; width: 320px; background: var(--card); border-left: 1px solid var(--border); padding: 20px; z-index: 200; box-shadow: -5px 0 20px rgba(0,0,0,0.1); overflow-y: auto; }
         .panel-on #mg-panel { display: block; }
         
-        /* 交互组件 */
         .card { background: var(--card); padding: 24px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; background: var(--primary); color: white; }
         .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
-        .btn-danger { background: var(--error); color: white; }
         
         .tab { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); cursor: pointer; font-size: 13px; background: var(--card); white-space: nowrap; }
         .tab.active { background: var(--primary); color: white; border-color: var(--primary); }
@@ -51,18 +48,13 @@
         .show { display: block; }
 
         .search-input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); margin-bottom: 15px; outline: none; }
-        
-        /* 题库列表项 */
-        .bank-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
-        .bank-item.active { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
-
         .footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 15px; background: var(--card); border-top: 1px solid var(--border); display: flex; justify-content: center; gap: 15px; z-index: 150; }
     </style>
 </head>
-<body>
+<body class="panel-on">
 
 <div class="nav">
-    <div style="font-weight: 900; font-size: 1.1rem;" onclick="location.reload()">智学题库 PRO</div>
+    <div style="font-weight: 900; font-size: 1.1rem;">智学题库 PRO</div>
     <div style="display: flex; gap: 12px; align-items: center;">
         <span onclick="toggleMode()" style="cursor:pointer; font-size: 20px;">🌓</span>
         <button class="btn btn-ghost" onclick="togglePanel()">管理</button>
@@ -74,26 +66,21 @@
         <h3 style="margin:0">题库管理</h3>
         <button class="btn btn-ghost" onclick="togglePanel()">关闭</button>
     </div>
-    
     <button class="btn" style="width:100%; margin-bottom:15px" onclick="addBank()">+ 新建题库</button>
     <div id="b-list"></div>
-    
     <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
-    
     <h4>导入题目</h4>
-    <input type="file" id="up" accept=".docx,.txt,.json" style="display:none" onchange="importFile(this)">
-    <button class="btn btn-ghost" style="width:100%" onclick="document.getElementById('up').click()">上传文件 (.docx/txt)</button>
-    
+    <input type="file" id="up" accept=".docx,.txt" style="display:none" onchange="importFile(this)">
+    <button class="btn btn-ghost" style="width:100%" onclick="document.getElementById('up').click()">上传文件 (.docx)</button>
     <div id="batch-del" style="margin-top:20px; display:none">
         <h4>批量管理 (<span id="sel-n">0</span>)</h4>
-        <button class="btn btn-danger" style="width:100%" onclick="doBatchDel()">删除选中题目</button>
+        <button class="btn" style="background:var(--error); width:100%" onclick="doBatchDel()">删除选中</button>
         <div id="q-manage-list" style="max-height:150px; overflow-y:auto; font-size:12px; margin-top:10px"></div>
     </div>
 </div>
 
 <div class="container">
     <input type="text" id="srch" class="search-input" placeholder="输入关键词搜索题目..." oninput="doSearch()">
-    
     <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 10px;">
         <div class="tab active" onclick="setTab('all')">全部</div>
         <div class="tab" onclick="setTab('single')">单选</div>
@@ -102,7 +89,6 @@
         <div class="tab" onclick="setTab('fill')">填空</div>
         <div class="tab" id="mistake-tab" onclick="toggleMistake()" style="border-color:var(--error); color:var(--error)">错题 (<span id="w-n">0</span>)</div>
     </div>
-
     <div class="card" id="main-card">
         <div id="quiz">请在管理面板中选择或导入题库</div>
     </div>
@@ -114,7 +100,6 @@
 </div>
 
 <script>
-    // 1. 数据库逻辑 (IndexedDB)
     let db;
     const req = indexedDB.open('QuizProDB', 1);
     req.onupgradeneeded = e => e.target.result.createObjectStore('banks', {keyPath:'id', autoIncrement:true});
@@ -167,11 +152,9 @@
     function render() {
         const qz = document.getElementById('quiz');
         if (!pool.length) { qz.innerHTML = '<center style="padding:40px; color:var(--subtext)">暂无题目</center>'; return; }
-        
         const q = pool[idx], done = q.uAns !== undefined;
         let opts = q.options || [];
         if (q.type === 'judge' && !opts.length) opts = [{label:'A', content:'对'}, {label:'B', content:'错'}];
-
         qz.innerHTML = `
             <div style="font-size:12px; color:var(--subtext); margin-bottom:10px;">${idx+1}/${pool.length} | ${q.type}</div>
             <div style="font-size:18px; font-weight:700; margin-bottom:20px; line-height:1.6">${q.question.replace(new RegExp(`(${keyword})`, 'gi'), '<mark>$1</mark>')}</div>
@@ -207,7 +190,6 @@
         document.getElementById('w-n').innerText = curBank.wrongs.length;
     }
 
-    // 文件导入
     async function importFile(input) {
         if (!curBank) return alert("请先选个题库");
         const file = input.files[0]; if (!file) return;
@@ -217,7 +199,6 @@
             const res = await mammoth.extractRawText({ arrayBuffer: ab });
             txt = res.value;
         } else { txt = await file.text(); }
-        
         const newQs = parse(txt);
         curBank.qs = [...curBank.qs, ...newQs];
         const tx = db.transaction('banks', 'readwrite');
@@ -243,7 +224,6 @@
         return res;
     }
 
-    // 键盘监听
     window.onkeydown = e => {
         const q = pool[idx]; if (!q) return;
         if (e.key >= '1' && e.key <= '4' && q.type !== 'fill') doSel(['A','B','C','D'][e.key-1]);
@@ -255,7 +235,6 @@
         }
     };
 
-    // 其他 UI 逻辑
     function move(s) { if(pool[idx+s]) { idx += s; render(); } }
     function addBank() { const n = prompt("名字:"); if(n) { const tx = db.transaction('banks','readwrite'); tx.objectStore('banks').add({name:n, qs:[], wrongs:[]}).onsuccess = refreshBanks; } }
     function delBank(e, id) { e.stopPropagation(); if(confirm("删？")) { const tx = db.transaction('banks','readwrite'); tx.objectStore('banks').delete(id).onsuccess = refreshBanks; } }
@@ -265,8 +244,7 @@
     function togglePanel() { document.body.classList.toggle('panel-on'); }
     function toggleMode() { document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
     function drawBatch() {
-        const c = document.getElementById('q-manage-list');
-        document.getElementById('batch-del').style.display = 'block';
+        const c = document.getElementById('q-manage-list'); document.getElementById('batch-del').style.display = 'block';
         c.innerHTML = curBank.qs.map(q => `<div style="display:flex;gap:5px"><input type="checkbox" class="qb" value="${q.id}" onchange="document.getElementById('sel-n').innerText=document.querySelectorAll('.qb:checked').length"> ${q.question.slice(0,15)}...</div>`).join('');
     }
     function doBatchDel() {
@@ -274,26 +252,21 @@
         if(!ids.length) return;
         curBank.qs = curBank.qs.filter(q => !ids.includes(q.id));
         curBank.wrongs = curBank.wrongs.filter(id => !ids.includes(id));
-        const tx = db.transaction('banks', 'readwrite');
-        tx.objectStore('banks').put(curBank).onsuccess = () => loadBank(curBank.id);
+        const tx = db.transaction('banks', 'readwrite'); tx.objectStore('banks').put(curBank).onsuccess = () => loadBank(curBank.id);
     }
 
     // ==========================================
-    // 📢 核心强刷逻辑：这里就是你没找到的代码
+    // 📢 静态版本控制：杜绝死循环弹窗
     // ==========================================
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            // 我们在路径后面加上当前的时间戳，强制 iOS 认为这是个新请求
-            const swUrl = `sw.js?v=${new Date().getTime()}`;
-            navigator.serviceWorker.register(swUrl).then(reg => {
-                console.log('SW 注册成功:', reg.scope);
-                
-                // 如果发现有新内容在等待激活，强制立即刷新
+            const VERSION = '1.0.2'; // 只有你想强制刷新手机缓存时，才手动改这个数字
+            navigator.serviceWorker.register(`sw.js?v=${VERSION}`).then(reg => {
                 reg.onupdatefound = () => {
-                    const installingWorker = reg.installing;
-                    installingWorker.onstatechange = () => {
-                        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            if (confirm("发现新版本题库系统，是否立即更新？")) {
+                    const worker = reg.installing;
+                    worker.onstatechange = () => {
+                        if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+                            if (confirm("发现系统版本更新，是否立即刷新应用？")) {
                                 location.reload();
                             }
                         }
